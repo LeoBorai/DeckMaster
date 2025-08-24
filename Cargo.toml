@@ -16,7 +16,7 @@ version = "0.0.0"
 
 [workspace.dependencies]
 anyhow = "1.0"
-axum = "0.7"
+axum = "0.8"
 chrono = "0.4"
 futures-util = "0.3"
 serde = "1.0"
@@ -25,6 +25,8 @@ tokio = "1.42"
 tracing = "0.1"
 tracing-subscriber = "0.3"
 turso = "0.1"
+utoipa = "5.4"
+utoipa-swagger-ui = "9.0"
 uuid = "1"
 
 deckmaster-domain = { path = "src/domain" }

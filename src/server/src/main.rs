@@ -1,16 +1,15 @@
 mod helpers;
 mod modules;
-
-use std::sync::Arc;
+mod router;
+mod services;
 
 use anyhow::Result;
+use tokio::net::TcpListener;
 use tracing_subscriber::EnvFilter;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 
-use deckmaster_domain::mtg::service::{FindDecksFilter, MtgService};
-
-use self::modules::mtg::repository::MtgRepository;
+use crate::router::make_router;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -21,12 +20,11 @@ async fn main() -> Result<()> {
         .with(filter_layer)
         .init();
 
-    let mtg_repository = MtgRepository::new().await?;
-    let mtg_repository = Arc::new(mtg_repository);
-    let mtg_service = MtgService::new(mtg_repository).await?;
+    let router = make_router().await?;
+    let listener = TcpListener::bind("127.0.0.1:7878").await?;
 
-    let decks = mtg_service.get_decks(FindDecksFilter::default()).await?;
+    tracing::info!("Listening on {}", listener.local_addr()?);
+    axum::serve(listener, router).await?;
 
-    println!("{decks:#?}");
     Ok(())
 }

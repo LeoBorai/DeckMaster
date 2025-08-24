@@ -26,8 +26,8 @@ pub struct MtgService<T: MtgDataAccessLayer> {
 }
 
 impl<T: MtgDataAccessLayer> MtgService<T> {
-    pub async fn new(repo: Arc<T>) -> Result<Self> {
-        Ok(MtgService { repo })
+    pub fn new(repo: Arc<T>) -> Self {
+        MtgService { repo }
     }
 
     pub async fn get_cards(&self, filter: FindCardsFilter) -> Result<Vec<Card>> {
