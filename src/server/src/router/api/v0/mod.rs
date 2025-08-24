@@ -31,10 +31,10 @@ pub struct PaginatedResponse<T> {
 pub struct PaginationParams {
     /// Page number (starts from 1)
     #[param(example = 1, minimum = 1)]
-    page: Option<u32>,
+    pub(self) page: Option<u32>,
     /// Number of items per page
     #[param(example = 20, minimum = 1, maximum = 100)]
-    limit: Option<u32>,
+    pub(self) limit: Option<u32>,
 }
 
 impl PaginationParams {
