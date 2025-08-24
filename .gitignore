@@ -1,5 +1,7 @@
 /target
-.DS_Store
+/node_modules
+/data/*
 
-data/*
 !/data/.gitkeep
+src/client/src/*.js
+.DS_Store

@@ -1,0 +1,12 @@
+{
+  "name": "deckmaster",
+  "version": "0.0.0",
+  "workspaces": [
+    "src/client",
+    "src/ui"
+  ],
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.39.1"
+  }
+}

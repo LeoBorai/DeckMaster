@@ -1,9 +1,16 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
+
+import { DeckMaster } from 'client';
+
 import './App.css'
 
 function App() {
+  const deckMaster = new DeckMaster();
+  console.log(deckMaster.sayHello());
+  deckMaster.mtg.getCardInfo();
+
   const [count, setCount] = useState(0)
 
   return (
