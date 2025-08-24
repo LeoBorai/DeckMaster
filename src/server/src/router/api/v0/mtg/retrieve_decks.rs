@@ -23,6 +23,8 @@ pub async fn handler(
     Extension(services): Extension<SharedServices>,
     Query(pagination): Query<PaginationParams>,
 ) -> Result<Json<PaginatedResponse<Deck>>, StatusCode> {
+    let page = pagination.page();
+    let limit = pagination.limit();
     let decks: Vec<Deck> = services
         .mtg
         .get_decks(FindDecksFilter::default())
@@ -35,8 +37,6 @@ pub async fn handler(
         .map(Deck::from)
         .collect();
     let total = decks.len() as u64;
-    let page = pagination.page.unwrap_or(1);
-    let limit = pagination.limit.unwrap_or(20);
     let total_pages = (total as f64 / limit as f64).ceil() as u32;
     let paginated_response = PaginatedResponse {
         data: decks,

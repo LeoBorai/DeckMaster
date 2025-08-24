@@ -22,9 +22,14 @@ pub async fn handler(
     Extension(services): Extension<SharedServices>,
     Query(pagination): Query<PaginationParams>,
 ) -> Result<Json<PaginatedResponse<Card>>, StatusCode> {
+    let page = pagination.page();
+    let limit = pagination.limit();
     let cards: Vec<Card> = services
         .mtg
-        .get_cards(FindCardsFilter::default())
+        .get_cards(FindCardsFilter {
+            deck_id: None,
+            page: page.into(),
+        })
         .await
         .map_err(|err| {
             tracing::error!("Failed to retrieve cards: {:?}", err);
@@ -34,8 +39,6 @@ pub async fn handler(
         .map(Card::from)
         .collect();
     let total = cards.len() as u64;
-    let page = pagination.page.unwrap_or(1);
-    let limit = pagination.limit.unwrap_or(20);
     let total_pages = (total as f64 / limit as f64).ceil() as u32;
     let paginated_response = PaginatedResponse {
         data: cards,

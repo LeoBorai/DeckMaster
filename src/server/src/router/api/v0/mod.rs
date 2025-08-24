@@ -27,14 +27,26 @@ pub struct PaginatedResponse<T> {
     pub total_pages: u32,
 }
 
-#[derive(Debug, Deserialize, IntoParams)]
+#[derive(Default, Debug, Deserialize, IntoParams)]
 pub struct PaginationParams {
     /// Page number (starts from 1)
     #[param(example = 1, minimum = 1)]
-    pub page: Option<u32>,
+    page: Option<u32>,
     /// Number of items per page
     #[param(example = 20, minimum = 1, maximum = 100)]
-    pub limit: Option<u32>,
+    limit: Option<u32>,
+}
+
+impl PaginationParams {
+    #[inline]
+    pub fn page(&self) -> u32 {
+        self.page.unwrap_or(1).min(1)
+    }
+
+    #[inline]
+    pub fn limit(&self) -> u32 {
+        self.limit.unwrap_or(20).max(100)
+    }
 }
 
 #[derive(OpenApi)]

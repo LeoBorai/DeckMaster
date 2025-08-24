@@ -43,6 +43,10 @@ impl ToSqlQuery for FindCardsFilter {
             query.push_str(&format!(" deck_id = '{deck_id}'"));
         }
 
+        let limit = 20;
+        let offset = (self.page.unwrap_or(1) - 1) * limit;
+        query.push_str(&format!(" LIMIT {limit} OFFSET {offset}"));
+
         query
     }
 }
@@ -68,6 +72,10 @@ impl ToSqlQuery for FindDecksFilter {
             // the values are parsed as UUIDs, so the risk is minimal
             query.push_str(&format!(" id = '{id}'"));
         }
+
+        let limit = 20;
+        let offset = (self.page.unwrap_or(1) - 1) * limit;
+        query.push_str(&format!(" LIMIT {limit} OFFSET {offset}"));
 
         query
     }
