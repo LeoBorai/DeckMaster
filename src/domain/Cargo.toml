@@ -1,0 +1,9 @@
+[package]
+name = "deckmaster-domain"
+edition.workspace = true
+version.workspace = true
+
+[dependencies]
+anyhow = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }

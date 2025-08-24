@@ -1,0 +1,7 @@
+services:
+  claude:
+    build:
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/workspaces/app
+    command: sleep infinity
