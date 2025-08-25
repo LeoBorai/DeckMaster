@@ -1,0 +1,6 @@
+name = "deckmaster"
+main = "build/worker/shim.mjs"
+compatibility_date = "2025-07-18"
+
+[build]
+command = "worker-build --release"

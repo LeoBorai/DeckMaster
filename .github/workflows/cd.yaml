@@ -1,0 +1,55 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Setup Rust Cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Setup Cargo Binstall
+        uses: cargo-bins/cargo-binstall@main
+
+      - name: Download Static Assets
+        run: |
+          curl -L https://huggingface.co/datasets/LeoBorai/magic-the-gathering/resolve/main/cards.csv\?download\=true -o ./data/cards.csv
+          curl -L https://huggingface.co/datasets/LeoBorai/magic-the-gathering/resolve/main/decks.csv\?download\=true -o ./data/decks.csv
+          gzip ./data/cards.csv
+          gzip ./data/decks.csv
+
+      - name: Install Rust Binaries
+        run: |
+          cargo binstall -y --force worker-build
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Server - Install Dependencies
+        working-directory: ./src/server
+        run: bun i
+
+      - name: Server - Build Cloudflare Worker
+        working-directory: ./src/server
+        run: worker-build --release
+
+      - name: Deploy Server
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          workingDirectory: ./src/server
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

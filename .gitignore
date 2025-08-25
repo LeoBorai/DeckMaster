@@ -1,5 +1,8 @@
+build
+node_modules
+.wrangler
+
 /target
-/node_modules
 /data/*
 
 !/data/.gitkeep

@@ -4,22 +4,12 @@ use axum::{Extension, Json};
 
 use deckmaster_domain::mtg::service::FindDecksFilter;
 
-use crate::router::api::v0::{ApiError, PaginatedResponse, PaginationParams};
+use crate::router::api::v0::{PaginatedResponse, PaginationParams};
 use crate::services::SharedServices;
 
 use super::Deck;
 
 /// Get all Decks with filtering
-#[utoipa::path(
-    get,
-    path = "/api/v0/mtg/decks",
-    params(PaginationParams),
-    responses(
-        (status = 200, description = "List of MTG Decks", body = Vec<Deck>),
-        (status = 400, description = "Invalid query parameters", body = ApiError)
-    ),
-    tag = "decks"
-)]
 pub async fn handler(
     Extension(services): Extension<SharedServices>,
     Query(pagination): Query<PaginationParams>,
@@ -30,10 +20,7 @@ pub async fn handler(
         .mtg
         .get_decks(FindDecksFilter::default())
         .await
-        .map_err(|err| {
-            tracing::error!("Failed to retrieve decks: {:?}", err);
-            StatusCode::INTERNAL_SERVER_ERROR
-        })?
+        .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?
         .into_iter()
         .map(Deck::from)
         .collect();
