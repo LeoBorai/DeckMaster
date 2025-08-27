@@ -19,6 +19,7 @@ chrono = { workspace = true, features = ["serde"] }
 console_error_panic_hook = { workspace = true }
 csv = { workspace = true }
 futures-util = { workspace = true }
+reqwest = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 tower-service = { workspace = true }

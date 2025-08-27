@@ -12,6 +12,9 @@ jobs:
     permissions:
       contents: read
       deployments: write
+    env:
+      CARDS_DATASET_URL: ${{ secrets.CARDS_DATASET_URL }}
+      DECKS_DATASET_URL: ${{ secrets.DECKS_DATASET_URL }}
     steps:
       - name: Checkout Source Code
         uses: actions/checkout@v4
@@ -24,13 +27,6 @@ jobs:
 
       - name: Setup Cargo Binstall
         uses: cargo-bins/cargo-binstall@main
-
-      - name: Download Static Assets
-        run: |
-          curl -L https://huggingface.co/datasets/LeoBorai/magic-the-gathering/resolve/main/cards.csv\?download\=true -o ./data/cards.csv
-          curl -L https://huggingface.co/datasets/LeoBorai/magic-the-gathering/resolve/main/decks.csv\?download\=true -o ./data/decks.csv
-          gzip ./data/cards.csv
-          gzip ./data/decks.csv
 
       - name: Install Rust Binaries
         run: |
