@@ -1,3 +1,4 @@
+use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -21,5 +22,5 @@ pub struct Deck {
     pub id: Uuid,
     pub name: String,
     pub code: String,
-    pub release: i64,
+    pub release: DateTime<Utc>,
 }
