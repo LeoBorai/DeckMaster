@@ -1,4 +1,4 @@
-name = "deckmaster"
+name = "deckmaster-api"
 main = "build/worker/shim.mjs"
 compatibility_date = "2025-07-18"
 
