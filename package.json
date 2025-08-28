@@ -3,7 +3,6 @@
   "version": "0.0.0",
   "workspaces": [
     "src/client",
-    "src/server",
     "src/ui"
   ],
   "devDependencies": {

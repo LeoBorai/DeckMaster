@@ -21,6 +21,3 @@ fmt:
 # Runs the UI Projectn
 run-ui:
 	cd ./src/ui && bun run dev
-
-run-server:
-	cd ./src/server && bun run dev

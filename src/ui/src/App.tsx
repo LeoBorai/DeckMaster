@@ -7,12 +7,9 @@ import { DeckMaster } from 'client';
 import './App.css'
 
 function App() {
-  const serverURL = new URL('http://localhost:8787');
-  const deckMaster = new DeckMaster(serverURL);
+  const deckMaster = new DeckMaster();
   console.log(deckMaster.sayHello());
-  deckMaster.mtg.getCards({
-    page: 1,
-  });
+  deckMaster.mtg.getCardInfo();
 
   const [count, setCount] = useState(0)
 
