@@ -7,8 +7,8 @@ use deckmaster_domain::mtg::{
     service::MtgService,
 };
 use reqwest::get;
+use worker::console_log;
 use worker::kv::KvStore;
-use worker::{console_error, console_log};
 
 use crate::modules::mtg::repository::MtgRepository;
 
@@ -67,22 +67,8 @@ impl Services {
     }
 
     async fn fetch_datasets() -> Result<Datasets> {
-        let cards = get(env!("CARDS_DATASET_URL"))
-            .await
-            .map_err(|err| {
-                console_error!("Failed to retrieve cards. {err}");
-                err
-            })?
-            .text()
-            .await?;
-        let decks = get(env!("DECKS_DATASET_URL"))
-            .await
-            .map_err(|err| {
-                console_error!("Failed to retrieve decks. {err}");
-                err
-            })?
-            .text()
-            .await?;
+        let cards = get(env!("CARDS_DATASET_URL")).await?.text().await?;
+        let decks = get(env!("DECKS_DATASET_URL")).await?.text().await?;
 
         let cards = csv::Reader::from_reader(cards.as_bytes())
             .deserialize()
