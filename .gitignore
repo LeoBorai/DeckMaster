@@ -4,5 +4,6 @@
 docker/tmp
 
 !/data/.gitkeep
+!/data/mtg.sqlite
 src/client/src/*.js
 .DS_Store

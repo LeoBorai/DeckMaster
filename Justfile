@@ -32,6 +32,7 @@ docker-build-server:
 # Builds the Docker image
 docker-build-image: docker-build-server
 	mkdir -p ./docker/tmp/
+	cp ./data/mtg.sqlite ./docker/tmp/mtg.sqlite
 	cp ./target/{{target_release}}/release/deckmaster-server ./docker/tmp/deckmaster-server
 	chmod +x ./docker/tmp/deckmaster-server
 	docker build -t "deckmaster:{{latest_tag}}" ./docker
