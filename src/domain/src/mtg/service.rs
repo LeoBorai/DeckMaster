@@ -5,13 +5,13 @@ use uuid::Uuid;
 
 use crate::mtg::model::{Card, Deck};
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct FindCardsFilter {
     pub deck_id: Option<Uuid>,
     pub page: Option<u32>,
 }
 
-#[derive(Clone, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct FindDecksFilter {
     pub id: Option<Uuid>,
     pub page: Option<u32>,

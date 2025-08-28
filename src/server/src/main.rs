@@ -1,4 +1,3 @@
-mod helpers;
 mod modules;
 mod router;
 mod services;
@@ -21,7 +20,7 @@ async fn main() -> Result<()> {
         .init();
 
     let router = make_router().await?;
-    let listener = TcpListener::bind("127.0.0.1:7878").await?;
+    let listener = TcpListener::bind("0.0.0.0:7878").await?;
 
     tracing::info!("Listening on {}", listener.local_addr()?);
     axum::serve(listener, router).await?;

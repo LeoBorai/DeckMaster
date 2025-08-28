@@ -1,6 +1,7 @@
 /target
 /node_modules
 /data/*
+docker/tmp
 
 !/data/.gitkeep
 src/client/src/*.js

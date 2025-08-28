@@ -20,11 +20,11 @@ pub struct ApiError {
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PaginatedResponse<T> {
-    pub data: Vec<T>,
     pub total: u64,
     pub page: u32,
     pub limit: u32,
     pub total_pages: u32,
+    pub data: Vec<T>,
 }
 
 #[derive(Default, Debug, Deserialize, IntoParams)]
@@ -79,7 +79,7 @@ impl PaginationParams {
     ),
     servers(
         (url = "http://localhost:7878", description = "Local development server"),
-        (url = "https://deckmaster.leoborai.com", description = "Production server")
+        (url = "https://api.deckmaster.leoborai.com", description = "Production server")
     )
 )]
 pub struct ApiV0Doc;

@@ -8,6 +8,7 @@ use utoipa::ToSchema;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Card {
     #[schema(example = "123e4567-e89b-12d3-a456-426614174003")]
     pub id: Uuid,
@@ -54,6 +55,7 @@ impl From<deckmaster_domain::mtg::model::Card> for Card {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Deck {
     #[schema(example = "123e4567-e89b-12d3-a456-426614174003")]
     pub id: Uuid,
