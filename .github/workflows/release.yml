@@ -46,6 +46,11 @@ jobs:
         with:
           version: 0.12.0
 
+      - name: Generate Version
+        run: |
+          CURRENT_VERSION_PLUS_SHA="pre-alpha-$(echo ${GITHUB_SHA:0:7})"
+          echo "VERSION=$CURRENT_VERSION_PLUS_SHA" >> $GITHUB_ENV
+
       - name: Setup Cargo Binstall
         uses: cargo-bins/cargo-binstall@main
 
@@ -80,7 +85,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             await github.request(`POST /repos/${{ github.repository }}/releases`, {
-              tag_name: "${{ github.ref }}",
+              tag_name: "${{ env.VERSION }}",
               generate_release_notes: true
             });
 
@@ -94,4 +99,4 @@ jobs:
           asset_name: deckmaster-server-${{ matrix.rust_target }}
           file: deckmaster-server-${{ matrix.rust_target }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          tag: ${{ github.ref }}
+          tag: "${{ env.VERSION }}"
