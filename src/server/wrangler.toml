@@ -2,13 +2,5 @@ name = "deckmaster"
 main = "build/worker/shim.mjs"
 compatibility_date = "2025-07-18"
 
-kv_namespaces = [
-  { binding = "__deckmaster_mtg_datasets", id = "48a4f45d27c2446dae695ba2e8e0ad6f" }
-]
-
 [build]
 command = "worker-build --release"
-
-[observability]
-enabled = true
-head_sampling_rate = 0.8

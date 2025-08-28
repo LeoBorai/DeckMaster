@@ -1,8 +1,11 @@
+use std::str::FromStr;
+
 use axum::extract::Query;
 use axum::http::StatusCode;
 use axum::{Extension, Json};
 
 use deckmaster_domain::mtg::service::FindCardsFilter;
+use uuid::Uuid;
 
 use crate::router::api::v0::{PaginatedResponse, PaginationParams};
 use crate::services::SharedServices;
@@ -18,7 +21,7 @@ pub async fn handler(
     let cards: Vec<Card> = services
         .mtg
         .get_cards(FindCardsFilter {
-            deck_id: None,
+            deck_id: Some(Uuid::from_str("fbde2352-13ce-5958-8042-fd18dc5ab01c").unwrap()),
             page: page.into(),
         })
         .await
