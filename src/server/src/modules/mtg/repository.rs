@@ -86,7 +86,7 @@ impl MtgDataAccessLayer for MtgRepository {
         Ok(cards)
     }
 
-    async fn find_decks(&self, filter: FindDecksFilter) -> Result<Vec<Deck>> {
+    async fn find_decks(&self, _: FindDecksFilter) -> Result<Vec<Deck>> {
         let mut conn = self.db.acquire().await?.detach();
         let rows: Vec<SqliteRow> = sqlx::query(
             r#"SELECT
