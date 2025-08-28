@@ -1,83 +1,20 @@
-use std::str::FromStr;
 use std::sync::Arc;
 
 use anyhow::{Result, anyhow};
 
+use deckmaster_domain::mtg::{
+    model::{Card, Deck},
+    service::MtgService,
+};
 use reqwest::get;
-use serde::{Deserialize, Serialize};
-use uuid::Uuid;
 use worker::kv::KvStore;
 use worker::{console_error, console_log};
-
-use deckmaster_domain::mtg::service::MtgService;
 
 use crate::modules::mtg::repository::MtgRepository;
 
 pub type SharedServices = Arc<Services>;
 
 const CARDS_CACHE_CHUNKS: usize = 95;
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Card {
-    pub id: String,
-    pub title: String,
-    pub number: i64,
-    pub description: Option<String>,
-    pub mana: Option<String>,
-    pub kind: String,
-    pub rarity: String,
-    pub artist: Option<String>,
-    pub power: Option<String>,
-    pub toughness: Option<String>,
-    pub deck_id: String,
-}
-
-impl TryInto<deckmaster_domain::mtg::model::Card> for Card {
-    type Error = anyhow::Error;
-
-    fn try_into(self) -> Result<deckmaster_domain::mtg::model::Card, Self::Error> {
-        Ok(deckmaster_domain::mtg::model::Card {
-            id: Uuid::from_str(&self.id)?,
-            title: self.title,
-            number: self.number,
-            description: self.description,
-            mana: self
-                .mana
-                .map(|str| str.split(", ").map(|s| s.to_string()).collect()),
-            kind: self.kind,
-            rarity: self.rarity,
-            artist: self.artist,
-            power: self.power,
-            toughness: self.toughness,
-            deck_id: Uuid::from_str(&self.deck_id)?,
-        })
-    }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct Deck {
-    pub id: String,
-    pub name: String,
-    pub code: String,
-    pub release: i64,
-}
-
-impl TryInto<deckmaster_domain::mtg::model::Deck> for Deck {
-    type Error = anyhow::Error;
-
-    fn try_into(self) -> Result<deckmaster_domain::mtg::model::Deck, Self::Error> {
-        let release = chrono::DateTime::from_timestamp(self.release, 0)
-            .unwrap_or_default()
-            .to_utc();
-
-        Ok(deckmaster_domain::mtg::model::Deck {
-            id: Uuid::from_str(&self.id)?,
-            name: self.name,
-            code: self.code,
-            release,
-        })
-    }
-}
 
 enum Cache {
     Hit { cards: Vec<Card>, decks: Vec<Deck> },
@@ -101,14 +38,6 @@ pub struct Services {
 impl Services {
     pub async fn new(kv: &KvStore) -> Result<Self> {
         let Resources { cards, decks } = Self::fetch_resources(kv).await?;
-        let cards = cards
-            .into_iter()
-            .filter_map(|card| card.clone().try_into().ok())
-            .collect::<Vec<deckmaster_domain::mtg::model::Card>>();
-        let decks = decks
-            .into_iter()
-            .filter_map(|deck| deck.clone().try_into().ok())
-            .collect::<Vec<deckmaster_domain::mtg::model::Deck>>();
         let mtg_repository = MtgRepository::new(cards, decks).await?;
         let mtg_repository = Arc::new(mtg_repository);
         let mtg = MtgService::new(mtg_repository);
