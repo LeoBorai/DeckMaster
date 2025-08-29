@@ -1,5 +1,6 @@
 pub mod retrieve_cards;
 pub mod retrieve_decks;
+pub mod retrieve_image;
 
 use axum::{Router, routing::get};
 use chrono::{DateTime, Utc};
@@ -82,4 +83,5 @@ pub fn routes() -> Router {
     Router::new()
         .route("/cards", get(retrieve_cards::handler))
         .route("/decks", get(retrieve_decks::handler))
+        .route("/image", get(retrieve_image::handler))
 }

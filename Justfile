@@ -2,7 +2,7 @@
 
 set positional-arguments
 
-latest_tag := `git describe --tags --abbrev=0 || echo "0.0.0"`
+latest_tag := `echo "pre-alpha-$(git rev-parse --short HEAD)"`
 target_release := "x86_64-unknown-linux-musl"
 
 # Lists available commands

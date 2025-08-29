@@ -1,22 +1,25 @@
 use std::sync::Arc;
 
 use anyhow::Result;
+use bytes::Bytes;
 use chrono::Utc;
+use reqwest::{StatusCode, Url};
 use sqlx::sqlite::SqliteRow;
 use sqlx::{QueryBuilder, Row, SqlitePool};
 
 use deckmaster_domain::mtg::model::{Card, Deck};
-use deckmaster_domain::mtg::service::MtgDataAccessLayer;
 use deckmaster_domain::mtg::service::{FindCardsFilter, FindDecksFilter};
+use deckmaster_domain::mtg::service::{FindImageFilter, MtgDataAccessLayer};
 
 #[derive(Clone)]
 pub struct MtgRepository {
     db: Arc<SqlitePool>,
+    storage_url: Url,
 }
 
 impl MtgRepository {
-    pub async fn new(db: Arc<SqlitePool>) -> Result<Self> {
-        Ok(MtgRepository { db })
+    pub async fn new(db: Arc<SqlitePool>, storage_url: Url) -> Result<Self> {
+        Ok(MtgRepository { db, storage_url })
     }
 }
 
@@ -117,5 +120,23 @@ impl MtgDataAccessLayer for MtgRepository {
         }
 
         Ok(decks)
+    }
+
+    async fn find_image(&self, filter: FindImageFilter) -> Result<Bytes> {
+        if let Some((deck_id, card_id)) = filter.card {
+            let image_url = self.storage_url.join(&format!(
+                "magic-the-gathering/images/cards/{}/{}.jpg",
+                deck_id, card_id
+            ))?;
+            println!("{}", image_url);
+            let response = reqwest::get(image_url).await?;
+
+            if response.status() == StatusCode::OK {
+                let bytes = response.bytes().await?;
+                return Ok(bytes);
+            }
+        }
+
+        Err(anyhow::anyhow!("Card ID and Deck ID must be provided"))
     }
 }
