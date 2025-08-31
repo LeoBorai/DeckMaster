@@ -72,9 +72,6 @@ jobs:
       - name: Install Dependencies
         run: bun i
 
-      - name: Build UI
-        run: bun i
-
       - name: Build Image
         run: just docker-build-image
 
