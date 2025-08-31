@@ -45,7 +45,10 @@ docker-publish-image:
 	docker push ghcr.io/leoborai/deckmaster:latest
 
 docker-run-image: docker-build-image
-	docker run -p 7878:7878 deckmaster:{{latest_tag}}
+	docker run \
+		-p 7878:7878 \
+		-e STORAGE_URL=$STORAGE_URL \
+		deckmaster:{{latest_tag}}
 
 fmt:
 	cargo clippy --workspace --fix --allow-dirty --allow-staged && cargo fmt --all
