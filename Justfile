@@ -26,7 +26,7 @@ claude-down:
 	docker compose -f dev/docker-compose.yml down
 
 # Builds the Server binary used in the Docker Image
-docker-build-server:
+docker-build-server: ui-build
 	cargo zigbuild --target {{target_release}} --release -p deckmaster-server
 
 # Builds the Docker image
@@ -53,5 +53,9 @@ fmt:
 	cd ./src/ui && bun run lint
 
 # Runs the UI Projectn
-run-ui:
+ui-dev:
 	cd ./src/ui && bun run dev
+
+# Builds the UI for the DeckMaster project
+ui-build: client-build
+	cd ./src/ui && bun run build
