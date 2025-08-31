@@ -26,7 +26,7 @@ claude-down:
 	docker compose -f dev/docker-compose.yml down
 
 # Builds the Server binary used in the Docker Image
-docker-build-server:
+docker-build-server: ui-build
 	cargo zigbuild --target {{target_release}} --release -p deckmaster-server
 
 # Builds the Docker image
@@ -45,7 +45,10 @@ docker-publish-image:
 	docker push ghcr.io/leoborai/deckmaster:latest
 
 docker-run-image: docker-build-image
-	docker run -p 7878:7878 deckmaster:{{latest_tag}}
+	docker run \
+		-p 7878:7878 \
+		-e STORAGE_URL=$STORAGE_URL \
+		deckmaster:{{latest_tag}}
 
 fmt:
 	cargo clippy --workspace --fix --allow-dirty --allow-staged && cargo fmt --all
@@ -53,5 +56,9 @@ fmt:
 	cd ./src/ui && bun run lint
 
 # Runs the UI Projectn
-run-ui:
+ui-dev:
 	cd ./src/ui && bun run dev
+
+# Builds the UI for the DeckMaster project
+ui-build: client-build
+	cd ./src/ui && bun run build
