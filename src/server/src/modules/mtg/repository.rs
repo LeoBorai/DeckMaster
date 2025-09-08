@@ -7,25 +7,60 @@ use reqwest::{StatusCode, Url};
 use sqlx::sqlite::SqliteRow;
 use sqlx::{QueryBuilder, Row, SqlitePool};
 
+use deckmaster_domain::common::query_set::{QuerySet, QuerySetMeta};
 use deckmaster_domain::mtg::model::{Card, Deck};
 use deckmaster_domain::mtg::service::{FindCardsFilter, FindDecksFilter};
 use deckmaster_domain::mtg::service::{FindImageFilter, MtgDataAccessLayer};
 
 #[derive(Clone)]
+struct Counters {
+    cards: u32,
+    decks: u32,
+}
+
+#[derive(Clone)]
 pub struct MtgRepository {
     db: Arc<SqlitePool>,
     storage_url: Url,
+    counters: Counters,
 }
 
 impl MtgRepository {
     pub async fn new(db: Arc<SqlitePool>, storage_url: Url) -> Result<Self> {
-        Ok(MtgRepository { db, storage_url })
+        let mut repo = MtgRepository {
+            db,
+            storage_url,
+            counters: Counters { cards: 0, decks: 0 },
+        };
+
+        repo.count_tables().await?;
+
+        Ok(repo)
+    }
+
+    // The `mtg` table is immutable, so we can cache the count of rows
+    // to avoid running a COUNT(*) query every time we need it.
+    async fn count_tables(&mut self) -> Result<()> {
+        let mut conn = self.db.acquire().await?.detach();
+        let row: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM cards")
+            .fetch_one(&mut conn)
+            .await?;
+        self.counters.cards = row.0 as u32;
+
+        let row: (i64,) = sqlx::query_as("SELECT COUNT(*) FROM decks")
+            .fetch_one(&mut conn)
+            .await?;
+        self.counters.decks = row.0 as u32;
+
+        Ok(())
     }
 }
 
 impl MtgDataAccessLayer for MtgRepository {
-    async fn find_cards(&self, filter: FindCardsFilter) -> Result<Vec<Card>> {
+    async fn find_cards(&self, filter: FindCardsFilter) -> Result<QuerySet<Card>> {
         let mut conn = self.db.acquire().await?.detach();
+        let page = filter.page.unwrap_or(1);
+        let offset = page * 20;
         let mut query = QueryBuilder::new(
             r#"SELECT
                 id,
@@ -47,7 +82,6 @@ impl MtgDataAccessLayer for MtgRepository {
         }
 
         query.push(" FROM cards");
-        let offset = (filter.page.unwrap_or(1).saturating_sub(1)) * 20;
         query.push(" LIMIT 20 OFFSET ");
         query.push_bind(offset as i64);
 
@@ -86,21 +120,33 @@ impl MtgDataAccessLayer for MtgRepository {
             });
         }
 
-        Ok(cards)
+        Ok(QuerySet::new(
+            cards,
+            QuerySetMeta {
+                page,
+                per_page: 20,
+                total_pages: self.counters.cards.div_ceil(20),
+            },
+        ))
     }
 
-    async fn find_decks(&self, _: FindDecksFilter) -> Result<Vec<Deck>> {
+    async fn find_decks(&self, filter: FindDecksFilter) -> Result<QuerySet<Deck>> {
         let mut conn = self.db.acquire().await?.detach();
-        let rows: Vec<SqliteRow> = sqlx::query(
+        let page = filter.page.unwrap_or(1);
+        let offset = page * 20;
+        let mut query = QueryBuilder::new(
             r#"SELECT
                 id,
                 name,
                 code,
                 release
             FROM decks"#,
-        )
-        .fetch_all(&mut conn)
-        .await?;
+        );
+
+        query.push(" LIMIT 20 OFFSET ");
+        query.push_bind(offset as i64);
+
+        let rows: Vec<SqliteRow> = query.build().fetch_all(&mut conn).await?;
         let mut decks = Vec::new();
 
         for row in rows {
@@ -119,7 +165,14 @@ impl MtgDataAccessLayer for MtgRepository {
             });
         }
 
-        Ok(decks)
+        Ok(QuerySet::new(
+            decks,
+            QuerySetMeta {
+                page,
+                per_page: 20,
+                total_pages: self.counters.decks.div_ceil(20),
+            },
+        ))
     }
 
     async fn find_image(&self, filter: FindImageFilter) -> Result<Bytes> {
@@ -128,7 +181,6 @@ impl MtgDataAccessLayer for MtgRepository {
                 "magic-the-gathering/images/cards/{}/{}.jpg",
                 deck_id, card_id
             ))?;
-            println!("{}", image_url);
             let response = reqwest::get(image_url).await?;
 
             if response.status() == StatusCode::OK {

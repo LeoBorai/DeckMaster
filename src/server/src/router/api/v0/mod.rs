@@ -1,9 +1,10 @@
 mod mtg;
 
 use axum::Router;
-
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, OpenApi, ToSchema, schema};
+
+use deckmaster_domain::common::query_set::QuerySet;
 
 use crate::router::api::v0::mtg::{Card, Deck};
 
@@ -20,11 +21,23 @@ pub struct ApiError {
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
 #[serde(rename_all = "camelCase")]
 pub struct PaginatedResponse<T> {
-    pub total: u64,
     pub page: u32,
-    pub limit: u32,
+    pub total: u32,
     pub total_pages: u32,
     pub data: Vec<T>,
+}
+
+impl<T: Clone> From<QuerySet<T>> for PaginatedResponse<T> {
+    fn from(qs: QuerySet<T>) -> Self {
+        let data = qs.records().into_iter().collect();
+
+        PaginatedResponse {
+            total: qs.count(),
+            page: qs.page(),
+            total_pages: qs.total_pages(),
+            data,
+        }
+    }
 }
 
 #[derive(Default, Debug, Deserialize, IntoParams)]
@@ -32,20 +45,12 @@ pub struct PaginationParams {
     /// Page number (starts from 1)
     #[param(example = 1, minimum = 1)]
     pub(self) page: Option<u32>,
-    /// Number of items per page
-    #[param(example = 20, minimum = 1, maximum = 100)]
-    pub(self) limit: Option<u32>,
 }
 
 impl PaginationParams {
     #[inline]
     pub fn page(&self) -> u32 {
-        self.page.unwrap_or(1).min(1)
-    }
-
-    #[inline]
-    pub fn limit(&self) -> u32 {
-        self.limit.unwrap_or(20).max(100)
+        self.page.unwrap_or(1)
     }
 }
 

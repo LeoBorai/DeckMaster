@@ -4,6 +4,7 @@ use anyhow::Result;
 use bytes::Bytes;
 use uuid::Uuid;
 
+use crate::common::query_set::QuerySet;
 use crate::mtg::model::{Card, Deck};
 
 #[derive(Clone, Debug, Default)]
@@ -25,8 +26,8 @@ pub struct FindImageFilter {
 
 #[allow(async_fn_in_trait)]
 pub trait MtgDataAccessLayer: Clone + Send + Sync {
-    async fn find_cards(&self, filter: FindCardsFilter) -> Result<Vec<Card>>;
-    async fn find_decks(&self, filter: FindDecksFilter) -> Result<Vec<Deck>>;
+    async fn find_cards(&self, filter: FindCardsFilter) -> Result<QuerySet<Card>>;
+    async fn find_decks(&self, filter: FindDecksFilter) -> Result<QuerySet<Deck>>;
     async fn find_image(&self, filter: FindImageFilter) -> Result<Bytes>;
 }
 
@@ -39,12 +40,12 @@ impl<T: MtgDataAccessLayer> MtgService<T> {
         MtgService { repo }
     }
 
-    pub async fn get_cards(&self, filter: FindCardsFilter) -> Result<Vec<Card>> {
+    pub async fn get_cards(&self, filter: FindCardsFilter) -> Result<QuerySet<Card>> {
         let cards = self.repo.find_cards(filter).await?;
         Ok(cards)
     }
 
-    pub async fn get_decks(&self, filter: FindDecksFilter) -> Result<Vec<Deck>> {
+    pub async fn get_decks(&self, filter: FindDecksFilter) -> Result<QuerySet<Deck>> {
         let decks = self.repo.find_decks(filter).await?;
         Ok(decks)
     }

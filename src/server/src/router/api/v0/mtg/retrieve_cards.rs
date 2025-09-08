@@ -24,8 +24,7 @@ pub async fn handler(
     Query(pagination): Query<PaginationParams>,
 ) -> Result<Json<PaginatedResponse<Card>>, StatusCode> {
     let page = pagination.page();
-    let limit = pagination.limit();
-    let cards: Vec<Card> = services
+    let cards_qs = services
         .mtg
         .get_cards(FindCardsFilter {
             deck_id: None,
@@ -35,19 +34,10 @@ pub async fn handler(
         .map_err(|err| {
             tracing::error!("Failed to retrieve cards: {:?}", err);
             StatusCode::INTERNAL_SERVER_ERROR
-        })?
-        .into_iter()
-        .map(Card::from)
-        .collect();
-    let total = cards.len() as u64;
-    let total_pages = (total as f64 / limit as f64).ceil() as u32;
-    let paginated_response = PaginatedResponse {
-        data: cards,
-        total,
-        page,
-        limit,
-        total_pages,
-    };
+        })?;
+
+    let cards_qs = cards_qs.inner_map(Card::from);
+    let paginated_response = PaginatedResponse::from(cards_qs);
 
     Ok(Json(paginated_response))
 }
