@@ -30,6 +30,7 @@ sqlx = { version = "0.8", default-features = false }
 tokio = "1.42"
 tracing = "0.1"
 tracing-subscriber = "0.3"
+tower-http = "0.6"
 utoipa = "5.4"
 utoipa-swagger-ui = "9.0"
 uuid = "1"
