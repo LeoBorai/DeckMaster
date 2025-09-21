@@ -3,6 +3,9 @@ use axum::http::StatusCode;
 use axum::{Extension, Json};
 
 use deckmaster_domain::mtg::service::FindCardsFilter;
+use serde::Deserialize;
+use utoipa::IntoParams;
+use uuid::Uuid;
 
 use crate::router::api::v0::{ApiError, PaginatedResponse, PaginationParams};
 use crate::services::SharedServices;
@@ -22,12 +25,15 @@ use super::Card;
 pub async fn handler(
     Extension(services): Extension<SharedServices>,
     Query(pagination): Query<PaginationParams>,
+    Query(filter): Query<FindCardsParams>,
 ) -> Result<Json<PaginatedResponse<Card>>, StatusCode> {
     let page = pagination.page();
     let cards_qs = services
         .mtg
         .get_cards(FindCardsFilter {
             deck_id: None,
+            id: filter.id,
+            title: filter.title,
             page: page.into(),
         })
         .await
@@ -40,4 +46,14 @@ pub async fn handler(
     let paginated_response = PaginatedResponse::from(cards_qs);
 
     Ok(Json(paginated_response))
+}
+
+#[derive(Default, Debug, Deserialize, IntoParams)]
+pub struct FindCardsParams {
+    /// ID for the card
+    #[param(example = "2504cb4b-292f-5dd8-8c9e-6e805500454d")]
+    pub(self) id: Option<Uuid>,
+    /// Title for the card
+    #[param(example = "The Wise Mothman")]
+    pub(self) title: Option<String>,
 }

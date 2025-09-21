@@ -11,6 +11,7 @@ use deckmaster_domain::common::query_set::{QuerySet, QuerySetMeta};
 use deckmaster_domain::mtg::model::{Card, Deck};
 use deckmaster_domain::mtg::service::{FindCardsFilter, FindDecksFilter};
 use deckmaster_domain::mtg::service::{FindImageFilter, MtgDataAccessLayer};
+use tracing::error;
 
 #[derive(Clone)]
 struct Counters {
@@ -59,8 +60,8 @@ impl MtgRepository {
 impl MtgDataAccessLayer for MtgRepository {
     async fn find_cards(&self, filter: FindCardsFilter) -> Result<QuerySet<Card>> {
         let mut conn = self.db.acquire().await?.detach();
-        let page = filter.page.unwrap_or(1);
-        let offset = page * 20;
+        let page = filter.page.unwrap_or(0);
+        let _offset = page * 20;
         let mut query = QueryBuilder::new(
             r#"SELECT
                 id,
@@ -76,16 +77,34 @@ impl MtgDataAccessLayer for MtgRepository {
                 deck_id"#,
         );
 
-        if let Some(deck_id) = filter.deck_id {
-            query.push(" WHERE deck_id = ");
-            query.push_bind(deck_id);
+        query.push(" FROM cards");
+
+        if let Some(id) = filter.id {
+            query.push(format!(" WHERE  id = '{}'", id));
         }
 
-        query.push(" FROM cards");
-        query.push(" LIMIT 20 OFFSET ");
-        query.push_bind(offset as i64);
+        if let Some(title) = filter.title {
+            let normalized = title.trim().to_ascii_lowercase();
 
-        let rows: Vec<SqliteRow> = query.build().fetch_all(&mut conn).await?;
+            if filter.id.is_some() {
+                query.push(format!(" AND  title LIKE '%{}%'", normalized));
+            } else {
+                query.push(format!(" WHERE  title LIKE '%{}%'", normalized));
+            }
+        }
+
+        query.push(" LIMIT 20");
+
+        // FIXME: Needs review
+        // if offset > 0 {
+        //     query.push(" OFFSET ");
+        //     query.push_bind(offset as i64);
+        // }
+
+        let rows: Vec<SqliteRow> = query.build().fetch_all(&mut conn).await.map_err(|err| {
+            error!(?err, "An error ocurred fetching cards from database");
+            err
+        })?;
         let mut cards = Vec::new();
 
         for row in rows {

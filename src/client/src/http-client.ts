@@ -1,5 +1,12 @@
 import type { ApiError } from './types';
 
+export type RestApiResponse<T> = {
+  data: T;
+  page: number;
+  total: number;
+  totalPages: number;
+}
+
 export interface ClientConfig {
   baseUrl?: string;
   timeout?: number;
@@ -20,7 +27,7 @@ export class ApiClient {
     };
   }
 
-  protected async request<T>(path: string, options: RequestInit = {}): Promise<T> {
+  protected async request<T>(path: string, options: RequestInit = {}): Promise<RestApiResponse<T>> {
     const url = `${this.baseUrl}${path}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
@@ -44,7 +51,9 @@ export class ApiClient {
         throw new ApiClientError(errorData.message, response.status, errorData.code);
       }
 
-      return response.json();
+      const responseJson = response.json() as unknown as RestApiResponse<T>;
+
+      return responseJson;
     } catch (error) {
       clearTimeout(timeoutId);
 

@@ -9,7 +9,9 @@ use crate::mtg::model::{Card, Deck};
 
 #[derive(Clone, Debug, Default)]
 pub struct FindCardsFilter {
+    pub id: Option<Uuid>,
     pub deck_id: Option<Uuid>,
+    pub title: Option<String>,
     pub page: Option<u32>,
 }
 

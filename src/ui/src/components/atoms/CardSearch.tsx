@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 
+import { DeckMaster } from '@deckmaster/client';
+
 import type { JSX } from "react";
+import type { Card } from '@deckmaster/client/src/modules/MTG';
 
 type Props = {
-  onCardSelect(): void;
+  onCardSelect(card: Card): void;
 }
 
 export function CardSearch(props: Props): JSX.Element {
   const [inputValue, setInputValue] = useState('');
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestions, setSuggestions] = useState<Card[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const debounceRef = useRef<number | null>(null);
@@ -33,11 +36,11 @@ export function CardSearch(props: Props): JSX.Element {
 
     try {
       setIsLoading(true);
-      const results = await dm.getCards({
-        title: searchValue,
-        description: searchValue
+      const dm = new DeckMaster();
+      const results = await dm.mtg.getCards({
+        title: searchValue
       });
-      setSuggestions(results || []);
+      setSuggestions(results.data);
     } catch (error) {
       console.error('Error fetching cards:', error);
       setSuggestions([]);
@@ -65,11 +68,11 @@ export function CardSearch(props: Props): JSX.Element {
   };
 
   // Handle suggestion click
-  const handleSuggestionClick = (card) => {
-    setInputValue(card.name || card.title || '');
+  const handleSuggestionClick = (card: Card) => {
+    setInputValue(card.title);
     setShowSuggestions(false);
-    if (onCardSelect) {
-      onCardSelect(card);
+    if (props.onCardSelect) {
+      props.onCardSelect(card);
     }
   };
 
@@ -131,14 +134,8 @@ export function CardSearch(props: Props): JSX.Element {
                 className="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
               >
                 <div className="font-medium text-gray-900">
-                  {card.name || card.title || 'Unnamed Card'}
+                  {card.title}
                 </div>
-                {card.type && (
-                  <div className="text-sm text-gray-600">{card.type}</div>
-                )}
-                {card.manaCost && (
-                  <div className="text-sm text-blue-600">{card.manaCost}</div>
-                )}
               </div>
             ))
           ) : inputValue.trim() && !isLoading ? (

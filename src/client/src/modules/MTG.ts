@@ -1,9 +1,11 @@
-import { ApiClient, ClientConfig } from '../http-client';
+import { ApiClient, ClientConfig, RestApiResponse } from '../http-client';
 
 import type { PaginatedResponse } from '../types';
 
 export interface GetCardsParams {
   page?: number;
+  id?: string;
+  title?: string;
 }
 
 export interface GetDecksParams {
@@ -40,21 +42,21 @@ export class MTG extends ApiClient {
       super(config);
     }
 
-    async getCards(params?: GetCardsParams): Promise<Card[]> {
+    async getCards(params?: GetCardsParams): Promise<RestApiResponse<Card[]>> {
       const queryString = this.buildQueryString(params);
       return this.request<Card[]>(`/api/v0/mtg/cards${queryString}`);
     }
 
-    async getDecks(params?: GetDecksParams): Promise<Deck[]> {
+    async getDecks(params?: GetDecksParams): Promise<RestApiResponse<Deck[]>> {
       const queryString = this.buildQueryString(params);
       return this.request<Deck[]>(`/api/v0/mtg/decks${queryString}`);
     }
 
-    async getCardsByPage(page: number): Promise<Card[]> {
+    async getCardsByPage(page: number): Promise<RestApiResponse<Card[]>> {
         return this.getCards({ page });
     }
 
-    async getDecksByPage(page: number): Promise<Deck[]> {
+    async getDecksByPage(page: number): Promise<RestApiResponse<Deck[]>> {
         return this.getDecks({ page });
     }
 }
