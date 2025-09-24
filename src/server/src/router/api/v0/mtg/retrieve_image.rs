@@ -39,9 +39,7 @@ pub async fn handler(
 
     let bytes = services
         .mtg
-        .get_image(FindImageFilter {
-            card: Some((deck_id, card_id)),
-        })
+        .get_image(FindImageFilter { card_id, deck_id })
         .await
         .map_err(|err| {
             tracing::error!(

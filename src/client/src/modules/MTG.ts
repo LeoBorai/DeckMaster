@@ -6,6 +6,7 @@ export interface GetCardsParams {
   page?: number;
   id?: string;
   title?: string;
+  unique?: boolean;
 }
 
 export interface GetDecksParams {
@@ -40,6 +41,13 @@ export type PaginatedDecksResponse = PaginatedResponse<Deck>;
 export class MTG extends ApiClient {
     constructor(config?: ClientConfig) {
       super(config);
+    }
+
+    getImageUrlByCard(card: Card): string {
+      const url = new URL(`${this.baseUrl}/api/v0/mtg/image`);
+      url.searchParams.set('card_id', card.id);
+      url.searchParams.set('deck_id', card.deckId);
+      return url.toString();
     }
 
     async getCards(params?: GetCardsParams): Promise<RestApiResponse<Card[]>> {

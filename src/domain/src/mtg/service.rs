@@ -11,6 +11,7 @@ use crate::mtg::model::{Card, Deck};
 pub struct FindCardsFilter {
     pub id: Option<Uuid>,
     pub deck_id: Option<Uuid>,
+    pub unique: Option<bool>,
     pub title: Option<String>,
     pub page: Option<u32>,
 }
@@ -23,7 +24,8 @@ pub struct FindDecksFilter {
 
 #[derive(Clone, Debug, Default)]
 pub struct FindImageFilter {
-    pub card: Option<(Uuid, Uuid)>,
+    pub card_id: Uuid,
+    pub deck_id: Uuid,
 }
 
 #[allow(async_fn_in_trait)]

@@ -2,7 +2,8 @@
   "compilerOptions": {
     "declaration": true,
     "noEmit": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "lib": ["ESNext", "DOM"]
   },
   "include": ["src"]
 }

@@ -93,6 +93,12 @@ impl MtgDataAccessLayer for MtgRepository {
             }
         }
 
+        if let Some(unique) = filter.unique
+            && unique
+        {
+            query.push(" GROUP BY deck_id");
+        }
+
         query.push(" LIMIT 20");
 
         // FIXME: Needs review
@@ -195,19 +201,20 @@ impl MtgDataAccessLayer for MtgRepository {
     }
 
     async fn find_image(&self, filter: FindImageFilter) -> Result<Bytes> {
-        if let Some((deck_id, card_id)) = filter.card {
-            let image_url = self.storage_url.join(&format!(
-                "magic-the-gathering/images/cards/{}/{}.jpg",
-                deck_id, card_id
-            ))?;
-            let response = reqwest::get(image_url).await?;
+        let image_url = self.storage_url.join(&format!(
+            "magic-the-gathering/images/cards/{}/{}.jpg",
+            filter.deck_id, filter.card_id
+        ))?;
+        let response = reqwest::get(image_url).await?;
 
-            if response.status() == StatusCode::OK {
-                let bytes = response.bytes().await?;
-                return Ok(bytes);
-            }
+        if response.status() == StatusCode::OK {
+            let bytes = response.bytes().await?;
+            return Ok(bytes);
         }
 
-        Err(anyhow::anyhow!("Card ID and Deck ID must be provided"))
+        Err(anyhow::anyhow!(
+            "Image not found. Status: {}",
+            response.status()
+        ))
     }
 }

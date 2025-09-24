@@ -34,6 +34,7 @@ pub async fn handler(
             deck_id: None,
             id: filter.id,
             title: filter.title,
+            unique: filter.unique,
             page: page.into(),
         })
         .await
@@ -56,4 +57,7 @@ pub struct FindCardsParams {
     /// Title for the card
     #[param(example = "The Wise Mothman")]
     pub(self) title: Option<String>,
+    /// Wether to group by Deck ID
+    #[param(example = "true")]
+    pub(self) unique: Option<bool>,
 }

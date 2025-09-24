@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { DeckMaster } from '@deckmaster/client';
 
-import type { JSX } from "react";
+import type { ChangeEventHandler, JSX } from "react";
 import type { Card } from '@deckmaster/client/src/modules/MTG';
 
 type Props = {
@@ -22,12 +22,12 @@ export function CardSearch(props: Props): JSX.Element {
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
       }
-      debounceRef.current = setTimeout(() => func.apply(null, args), delay);
+      debounceRef.current = setTimeout(() => func(...args), delay);
     };
   };
 
   // Search function that calls the API
-  const searchCards = async (searchValue) => {
+  const searchCards = async (searchValue: string) => {
     if (!searchValue.trim()) {
       setSuggestions([]);
       setIsLoading(false);
@@ -38,7 +38,8 @@ export function CardSearch(props: Props): JSX.Element {
       setIsLoading(true);
       const dm = new DeckMaster();
       const results = await dm.mtg.getCards({
-        title: searchValue
+        title: searchValue,
+        unique: true,
       });
       setSuggestions(results.data);
     } catch (error) {
@@ -49,12 +50,10 @@ export function CardSearch(props: Props): JSX.Element {
     }
   };
 
-  // Create debounced version of search function
   const debouncedSearch = debounce(searchCards, 300);
 
-  // Handle input changes
-  const handleInputChange = (e) => {
-    const value = e.target.value;
+  const handleInputChange: ChangeEventHandler = (e) => {
+    const value = (e.target as unknown as { value: string; }).value;
     setInputValue(value);
     setShowSuggestions(true);
 
@@ -67,30 +66,26 @@ export function CardSearch(props: Props): JSX.Element {
     }
   };
 
-  // Handle suggestion click
   const handleSuggestionClick = (card: Card) => {
     setInputValue(card.title);
     setShowSuggestions(false);
     if (props.onCardSelect) {
       props.onCardSelect(card);
     }
-  };
+  }
 
-  // Handle input focus
   const handleFocus = () => {
     if (suggestions.length > 0) {
       setShowSuggestions(true);
     }
   };
 
-  // Handle input blur (with slight delay to allow for suggestion clicks)
   const handleBlur = () => {
     setTimeout(() => {
       setShowSuggestions(false);
     }, 200);
   };
 
-  // Cleanup timeout on unmount
   useEffect(() => {
     return () => {
       if (debounceRef.current) {
@@ -101,7 +96,6 @@ export function CardSearch(props: Props): JSX.Element {
 
   return (
     <div className="relative w-full max-w-md">
-      {/* Input Field */}
       <div className="relative">
         <input
           type="text"
@@ -112,16 +106,12 @@ export function CardSearch(props: Props): JSX.Element {
           placeholder="Search for a card..."
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors"
         />
-
-        {/* Loading indicator */}
         {isLoading && (
           <div className="absolute right-3 top-2.5">
             <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
           </div>
         )}
       </div>
-
-      {/* Suggestions dropdown */}
       {showSuggestions && (
         <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto z-50">
           {isLoading && suggestions.length === 0 ? (

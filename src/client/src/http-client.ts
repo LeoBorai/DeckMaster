@@ -14,9 +14,10 @@ export interface ClientConfig {
 }
 
 export class ApiClient {
-  private baseUrl: string;
   private timeout: number;
   private headers: Record<string, string>;
+
+  protected baseUrl: string;
 
   constructor(config: ClientConfig = {}) {
     this.baseUrl = config.baseUrl || 'http://localhost:7878';
