@@ -16,6 +16,7 @@ use super::Card;
     get,
     path = "/api/v0/mtg/cards",
     params(PaginationParams),
+    params(FindCardsParams),
     responses(
         (status = 200, description = "List of MTG Cards", body = Vec<Card>),
         (status = 400, description = "Invalid query parameters", body = ApiError)

@@ -13,7 +13,9 @@ http = { workspace = true }
 mime_guess = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-sqlx = { workspace = true, features = ["chrono", "runtime-tokio", "sqlite", "tls-none", "uuid"] }
+sea-query = { workspace = true, features = ["sqlx-utils"] }
+sea-query-sqlx = { workspace = true, features = ["sqlx-sqlite", "with-chrono", "with-json", "with-uuid", "with-time"] }
+sqlx = { workspace = true, features = ["chrono", "macros", "runtime-tokio", "sqlite", "tls-none", "uuid"] }
 reqwest = { workspace = true, features = ["rustls-tls"] }
 rust-embed = { workspace = true }
 tokio = { workspace = true, features = ["rt-multi-thread"] }
