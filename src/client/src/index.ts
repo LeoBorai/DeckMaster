@@ -1,5 +1,6 @@
 import { MTG } from "./modules/MTG";
-import { ClientConfig } from "./http-client";
+
+import type { ClientConfig } from "./http-client";
 
 export type { ClientConfig } from './http-client';
 

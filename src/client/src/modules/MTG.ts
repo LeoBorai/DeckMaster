@@ -1,5 +1,6 @@
-import { ApiClient, ClientConfig, RestApiResponse } from '../http-client';
+import { ApiClient } from '../http-client';
 
+import type { ClientConfig, RestApiResponse } from '../http-client';
 import type { PaginatedResponse } from '../types';
 
 export interface GetCardsParams {

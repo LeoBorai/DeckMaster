@@ -49,7 +49,7 @@ export class ApiClient {
         const errorData: ApiError = await response.json().catch(() => ({
           message: `HTTP ${response.status}: ${response.statusText}`,
         }));
-        throw new ApiClientError(errorData.message, response.status, errorData.code);
+        throw new ApiClientError(errorData.message, response.status, errorData.code as string);
       }
 
       const responseJson = response.json() as unknown as RestApiResponse<T>;
