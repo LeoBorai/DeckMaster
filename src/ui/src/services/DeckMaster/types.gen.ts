@@ -80,7 +80,7 @@ export type RetrieveCardsData = {
          */
         title?: string | null;
         /**
-         * Wether to group by Deck ID
+         * Whether to group by Deck ID
          */
         unique?: boolean | null;
     };

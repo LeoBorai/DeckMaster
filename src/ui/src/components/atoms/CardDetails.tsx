@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Mana } from "./Mana";
 import { retrieveImage } from "../../services/DeckMaster";
@@ -13,9 +13,13 @@ export type Props = {
 export function CardDetails({ card }: Props): JSX.Element {
   const [image, setImage] = useState<string>('/images/mtg_card_back.png');
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     asyncLoadImage(card);
-  }, [card]);
+
+    return () => {
+      URL.revokeObjectURL(image);
+    }
+  }, [card, image]);
 
   const asyncLoadImage = async (card: Card) => {
     const response = await retrieveImage({
