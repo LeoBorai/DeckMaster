@@ -14,11 +14,12 @@ use super::Card;
 
 #[utoipa::path(
     get,
+    operation_id = "retrieve_cards",
     path = "/api/v0/mtg/cards",
     params(PaginationParams),
     params(FindCardsParams),
     responses(
-        (status = 200, description = "List of MTG Cards", body = Vec<Card>),
+        (status = 200, description = "List of MTG Cards", body = PaginatedResponse<Card>),
         (status = 400, description = "Invalid query parameters", body = ApiError)
     ),
     tag = "cards"

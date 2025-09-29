@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 
-import { DeckMaster } from "@deckmaster/client";
 import { Mana } from "./Mana";
+import { retrieveImage } from "../../services/DeckMaster";
 
 import type { JSX } from 'react';
-import type { Card } from '@deckmaster/client/src/modules/MTG';
+import type { Card } from "../../services/DeckMaster/types.gen";
 
 export type Props = {
   card: Card;
@@ -13,17 +13,21 @@ export type Props = {
 export function CardDetails({ card }: Props): JSX.Element {
   const [image, setImage] = useState<string>('/images/mtg_card_back.png');
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     asyncLoadImage(card);
   }, [card]);
 
   const asyncLoadImage = async (card: Card) => {
-    const dm = new DeckMaster();
-    const url = dm.mtg.getImageUrlByCard(card);
-    const response = await fetch(url);
+    const response = await retrieveImage({
+      baseUrl: import.meta.env.VITE_DECKMASTER_API_URL,
+      path: {
+        card_id: card.id,
+        deck_id: card.deckId,
+      }
+    });
 
-    if (response.ok) {
-      setImage(url);
+    if (response.data) {
+      setImage(URL.createObjectURL(response.data as unknown as Blob));
     }
   }
 
