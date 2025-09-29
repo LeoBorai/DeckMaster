@@ -12,10 +12,11 @@ use super::Deck;
 /// Get all Decks with filtering
 #[utoipa::path(
     get,
+    operation_id = "retrieve_decks",
     path = "/api/v0/mtg/decks",
     params(PaginationParams),
     responses(
-        (status = 200, description = "List of MTG Decks", body = Vec<Deck>),
+        (status = 200, description = "List of MTG Decks", body = PaginatedResponse<Deck>),
         (status = 400, description = "Invalid query parameters", body = ApiError)
     ),
     tag = "decks"

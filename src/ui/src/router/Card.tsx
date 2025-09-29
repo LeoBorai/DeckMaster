@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { DeckMaster } from "@deckmaster/client";
 import { CardDetails } from "../components/atoms/CardDetails";
+import { retrieveCards } from "../services/DeckMaster";
 
 import type { JSX } from 'react';
-import type { Card } from '@deckmaster/client/src/modules/MTG';
+import type { Card } from "../services/DeckMaster/types.gen";
+
 
 export function Card(): JSX.Element {
   const [card, setCard] = useState<Card | null>(null);
@@ -17,13 +18,17 @@ export function Card(): JSX.Element {
     (async () => {
       try {
         const id = params.id;
-        const dm = new DeckMaster();
-        const response = await dm.mtg.getCards({
-          id
-        });
-        const first = response.data[0];
 
-        setCard(first || null);
+        if (id) {
+          const cards = await retrieveCards({
+            baseUrl: import.meta.env.VITE_DECKMASTER_API_URL,
+            query: {
+              id,
+            }
+          });
+
+          setCard(cards?.data?.data[0] as Card || null);
+        }
       } catch (err) {
         setError(err as Error);
       } finally {

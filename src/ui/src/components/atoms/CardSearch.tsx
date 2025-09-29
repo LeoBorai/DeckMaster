@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 
-import { DeckMaster } from '@deckmaster/client';
+import { retrieveCards } from "../../services/DeckMaster";
 
 import type { ChangeEventHandler, JSX } from "react";
-import type { Card } from '@deckmaster/client/src/modules/MTG';
+import type { Card } from "../../services/DeckMaster/types.gen";
 
 type Props = {
   onCardSelect(card: Card): void;
@@ -36,12 +36,15 @@ export function CardSearch(props: Props): JSX.Element {
 
     try {
       setIsLoading(true);
-      const dm = new DeckMaster();
-      const results = await dm.mtg.getCards({
-        title: searchValue,
-        unique: true,
+      const results = await retrieveCards({
+        baseUrl: import.meta.env.VITE_DECKMASTER_API_URL,
+        query: {
+          title: searchValue,
+          unique: true,
+        }
       });
-      setSuggestions(results.data);
+
+      setSuggestions(results.data?.data || []);
     } catch (error) {
       console.error('Error fetching cards:', error);
       setSuggestions([]);

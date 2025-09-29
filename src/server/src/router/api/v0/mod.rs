@@ -59,6 +59,7 @@ impl PaginationParams {
     paths(
         mtg::retrieve_cards::handler,
         mtg::retrieve_decks::handler,
+        mtg::retrieve_image::handler,
     ),
     components(
         schemas(
@@ -72,6 +73,7 @@ impl PaginationParams {
     tags(
         (name = "cards", description = "Cards details retrieval endpoints"),
         (name = "decks", description = "Decks details retrieval endpoints"),
+        (name = "image", description = "Card Image retrieval endpoint"),
     ),
     info(
         title = "DeckMaster API",

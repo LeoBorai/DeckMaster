@@ -83,5 +83,5 @@ pub fn routes() -> Router {
     Router::new()
         .route("/cards", get(retrieve_cards::handler))
         .route("/decks", get(retrieve_decks::handler))
-        .route("/image", get(retrieve_image::handler))
+        .route("/image/{deck_id}/{card_id}", get(retrieve_image::handler))
 }
