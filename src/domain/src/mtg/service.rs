@@ -1,7 +1,9 @@
+use std::pin::Pin;
 use std::sync::Arc;
 
 use anyhow::Result;
 use bytes::Bytes;
+use futures_util::Stream;
 use uuid::Uuid;
 
 use crate::common::query_set::QuerySet;
@@ -32,7 +34,10 @@ pub struct FindImageFilter {
 pub trait MtgDataAccessLayer: Clone + Send + Sync {
     async fn find_cards(&self, filter: FindCardsFilter) -> Result<QuerySet<Card>>;
     async fn find_decks(&self, filter: FindDecksFilter) -> Result<QuerySet<Deck>>;
-    async fn find_image(&self, filter: FindImageFilter) -> Result<Bytes>;
+    async fn find_image(
+        &self,
+        filter: FindImageFilter,
+    ) -> Result<Option<Pin<Box<dyn Stream<Item = Result<Bytes, reqwest::Error>> + Send + Sync>>>>;
 }
 
 pub struct MtgService<T: MtgDataAccessLayer> {
@@ -54,7 +59,11 @@ impl<T: MtgDataAccessLayer> MtgService<T> {
         Ok(decks)
     }
 
-    pub async fn get_image(&self, filter: FindImageFilter) -> Result<Bytes> {
+    pub async fn get_image(
+        &self,
+        filter: FindImageFilter,
+    ) -> Result<Option<Pin<Box<dyn Stream<Item = Result<Bytes, reqwest::Error>> + Send + Sync>>>>
+    {
         let image = self.repo.find_image(filter).await?;
         Ok(image)
     }

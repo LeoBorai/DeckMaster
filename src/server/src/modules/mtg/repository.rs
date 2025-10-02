@@ -1,8 +1,10 @@
+use std::pin::Pin;
 use std::sync::Arc;
 
 use anyhow::{Context, Result};
 use bytes::Bytes;
 use chrono::{DateTime, Utc};
+use futures_util::Stream;
 use reqwest::{StatusCode, Url};
 use sea_query::{Expr, ExprTrait, Iden, Query, SqliteQueryBuilder};
 use sea_query_sqlx::SqlxBinder;
@@ -239,7 +241,11 @@ impl MtgDataAccessLayer for MtgRepository {
         ))
     }
 
-    async fn find_image(&self, filter: FindImageFilter) -> Result<Bytes> {
+    async fn find_image(
+        &self,
+        filter: FindImageFilter,
+    ) -> Result<Option<Pin<Box<dyn Stream<Item = Result<Bytes, reqwest::Error>> + Send + Sync>>>>
+    {
         let image_url = self.storage_url.join(&format!(
             "magic-the-gathering/images/cards/{}/{}.jpg",
             filter.deck_id, filter.card_id
@@ -247,12 +253,15 @@ impl MtgDataAccessLayer for MtgRepository {
         let response = reqwest::get(image_url).await?;
 
         if response.status() == StatusCode::OK {
-            let bytes = response.bytes().await?;
-            return Ok(bytes);
+            return Ok(Some(Box::pin(response.bytes_stream())));
+        }
+
+        if response.status() == StatusCode::NOT_FOUND {
+            return Ok(None);
         }
 
         Err(anyhow::anyhow!(
-            "Image not found. Status: {}",
+            "Failed to fetch image from storage. Status: {}",
             response.status()
         ))
     }

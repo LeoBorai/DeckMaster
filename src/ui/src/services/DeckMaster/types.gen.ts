@@ -147,9 +147,9 @@ export type RetrieveImageData = {
 
 export type RetrieveImageErrors = {
     /**
-     * Invalid query parameters
+     * Image not found
      */
-    400: ApiError;
+    404: ApiError;
 };
 
 export type RetrieveImageError = RetrieveImageErrors[keyof RetrieveImageErrors];

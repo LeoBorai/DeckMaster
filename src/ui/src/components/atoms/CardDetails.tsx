@@ -15,11 +15,15 @@ export function CardDetails({ card }: Props): JSX.Element {
 
   useEffect(() => {
     asyncLoadImage(card);
+  }, [card]);
 
+  useEffect(() => {
     return () => {
-      URL.revokeObjectURL(image);
+      if (image && image.startsWith("blob:")) {
+        URL.revokeObjectURL(image);
+      }
     }
-  }, [card, image]);
+  }, [image]);
 
   const asyncLoadImage = async (card: Card) => {
     const response = await retrieveImage({
