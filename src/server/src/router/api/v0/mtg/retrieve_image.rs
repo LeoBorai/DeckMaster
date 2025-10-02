@@ -1,4 +1,5 @@
 use axum::Extension;
+use axum::body::Body;
 use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -25,7 +26,7 @@ pub struct RetrieveImageQuery {
     params(RetrieveImageQuery),
     responses(
         (status = 200, description = "Retrieves an image from storage", body = Vec<u8>),
-        (status = 400, description = "Invalid query parameters", body = ApiError)
+        (status = 404, description = "Image not found", body = ApiError)
     ),
     tag = "cards"
 )]
@@ -33,7 +34,7 @@ pub async fn handler(
     Extension(services): Extension<SharedServices>,
     Path(path): Path<RetrieveImageQuery>,
 ) -> Result<impl IntoResponse, StatusCode> {
-    let bytes = services
+    let maybe_upstream_stream = services
         .mtg
         .get_image(FindImageFilter {
             card_id: path.card_id,
@@ -49,11 +50,17 @@ pub async fn handler(
             StatusCode::INTERNAL_SERVER_ERROR
         })?;
 
-    Ok((
-        [
-            (CONTENT_TYPE, "image/jpeg"),
-            (CACHE_CONTROL, "max-age=31536000, immutable"),
-        ],
-        bytes.to_vec(),
-    ))
+    if let Some(upstream_stream) = maybe_upstream_stream {
+        let body = Body::from_stream(upstream_stream);
+
+        return Ok((
+            [
+                (CONTENT_TYPE, "image/jpeg"),
+                (CACHE_CONTROL, "max-age=31536000, immutable"),
+            ],
+            body,
+        ));
+    }
+
+    Err(StatusCode::NOT_FOUND)
 }
