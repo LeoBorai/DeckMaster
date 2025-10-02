@@ -19,7 +19,9 @@ export function CardDetails({ card }: Props): JSX.Element {
 
   useEffect(() => {
     return () => {
-      URL.revokeObjectURL(image);
+      if (image && image.startsWith("blob:")) {
+        URL.revokeObjectURL(image);
+      }
     }
   }, [image]);
 
