@@ -13,10 +13,6 @@ default:
 latest_tag:
 	echo {{latest_tag}}
 
-# Builds the TypeScript Client
-client-build:
-	cd ./src/client && bun run build
-
 # Starts the Claude container
 claude:
     docker compose -f dev/docker-compose.yml up --build --detach
@@ -60,5 +56,5 @@ ui-dev:
 	cd ./src/ui && bun run dev
 
 # Builds the UI for the DeckMaster project
-ui-build: client-build
+ui-build:
 	cd ./src/ui && bun run build
