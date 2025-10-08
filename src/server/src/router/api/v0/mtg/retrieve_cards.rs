@@ -33,11 +33,12 @@ pub async fn handler(
     let cards_qs = services
         .mtg
         .get_cards(FindCardsFilter {
-            deck_id: None,
+            deck_id: filter.deck_id,
             id: filter.id,
             title: filter.title,
             unique: filter.unique,
             page: page.into(),
+            skip: filter.skip,
         })
         .await
         .map_err(|err| {
@@ -62,4 +63,12 @@ pub struct FindCardsParams {
     /// Whether to group by Deck ID
     #[param(example = "true")]
     pub(self) unique: Option<bool>,
+    /// Deck ID to filter cards by
+    #[param(example = "ac0dbd6e-4c71-5d7b-a96a-8bd1d7908326")]
+    pub(self) deck_id: Option<Uuid>,
+    /// UUIDs for Cards to Skip
+    #[param(
+        example = "2504cb4b-292f-5dd8-8c9e-6e805500454d, ac0dbd6e-4c71-5d7b-a96a-8bd1d7908326"
+    )]
+    pub(self) skip: Option<Uuid>,
 }

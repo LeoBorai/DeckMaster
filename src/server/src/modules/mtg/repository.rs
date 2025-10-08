@@ -155,6 +155,11 @@ impl MtgDataAccessLayer for MtgRepository {
     async fn find_cards(&self, filter: FindCardsFilter) -> Result<QuerySet<Card>> {
         let mut conn = self.db.acquire().await?.detach();
         let page = filter.page.unwrap_or(0);
+        let cols = if filter.unique.unwrap_or(false) {
+            [Cards::DeckId]
+        } else {
+            [Cards::Id]
+        };
         let (sql, values) = Query::select()
             .columns([
                 Cards::Id,
@@ -176,10 +181,11 @@ impl MtgDataAccessLayer for MtgRepository {
                     .deck_id
                     .map(|deck_id| Expr::col(Cards::DeckId).eq(deck_id.to_string())),
             )
+            .and_where_option(filter.skip.map(|skip| Expr::col(Cards::Id).is_not(skip)))
             .and_where_option(filter.title.map(|title| {
                 Expr::col(Cards::Title).like(format!("%{}%", title.replace('%', "\\%")))
             }))
-            .group_by_col(Cards::DeckId)
+            .group_by_columns(cols)
             .limit(PAGE_SIZE)
             .build_sqlx(SqliteQueryBuilder);
 

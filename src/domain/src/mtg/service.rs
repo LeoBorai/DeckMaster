@@ -15,6 +15,7 @@ pub struct FindCardsFilter {
     pub deck_id: Option<Uuid>,
     pub unique: Option<bool>,
     pub title: Option<String>,
+    pub skip: Option<Uuid>,
     pub page: Option<u32>,
 }
 

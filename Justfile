@@ -15,7 +15,7 @@ latest_tag:
 
 # Starts the Claude container
 claude:
-    docker compose -f dev/docker-compose.yml up --build --detach
+	docker compose -f dev/docker-compose.dev.yml up --build --detach
 
 # Tear down the Claude container
 claude-down:

@@ -6,7 +6,7 @@ import { Home } from "./Home";
 
 export const router = createBrowserRouter([
   {
-    id: 'root',
+    id: "root",
     path: "/",
     Component: Layout,
     children: [
@@ -16,9 +16,9 @@ export const router = createBrowserRouter([
         Component: Home,
       },
       {
-        path: '/cards/:id',
+        path: "/cards/:id",
         Component: Card,
-      }
+      },
     ],
   },
 ]);
