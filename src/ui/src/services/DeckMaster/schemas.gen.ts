@@ -166,12 +166,12 @@ export const PaginatedResponse_CardSchema = {
     },
     page: {
       type: "integer",
-      format: "int32",
+      format: "int64",
       minimum: 0,
     },
     total: {
       type: "integer",
-      format: "int32",
+      format: "int64",
       minimum: 0,
     },
     totalPages: {
@@ -215,12 +215,12 @@ export const PaginatedResponse_DeckSchema = {
     },
     page: {
       type: "integer",
-      format: "int32",
+      format: "int64",
       minimum: 0,
     },
     total: {
       type: "integer",
-      format: "int32",
+      format: "int64",
       minimum: 0,
     },
     totalPages: {

@@ -37,6 +37,14 @@ export function Card(): JSX.Element {
     })();
   }, [params.id]);
 
+  useEffect(() => {
+    document.title = card ? `${card.title} - DeckMaster` : "DeckMaster";
+    document.documentElement.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }, [card]);
+
   return (
     <div className="flex flex-col justify-center items-center py-6 px-4 my-auto w-full">
       {loading && <p>Loading...</p>}

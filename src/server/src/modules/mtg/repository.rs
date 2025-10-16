@@ -12,12 +12,11 @@ use sqlx::{FromRow, SqlitePool};
 use tracing::error;
 use uuid::Uuid;
 
+use deckmaster_domain::common::pagination::PAGE_SIZE;
 use deckmaster_domain::common::query_set::{QuerySet, QuerySetMeta};
 use deckmaster_domain::mtg::model::{Card, Deck};
 use deckmaster_domain::mtg::service::{FindCardsFilter, FindDecksFilter};
 use deckmaster_domain::mtg::service::{FindImageFilter, MtgDataAccessLayer};
-
-const PAGE_SIZE: u64 = 20;
 
 #[derive(Clone)]
 struct Counters {
@@ -154,7 +153,6 @@ impl MtgRepository {
 impl MtgDataAccessLayer for MtgRepository {
     async fn find_cards(&self, filter: FindCardsFilter) -> Result<QuerySet<Card>> {
         let mut conn = self.db.acquire().await?.detach();
-        let page = filter.page.unwrap_or(0);
         let cols = if filter.unique.unwrap_or(false) {
             [Cards::DeckId]
         } else {
@@ -187,7 +185,10 @@ impl MtgDataAccessLayer for MtgRepository {
             }))
             .group_by_columns(cols)
             .limit(PAGE_SIZE)
+            .offset(filter.pagination.offset())
             .build_sqlx(SqliteQueryBuilder);
+
+        println!("{sql}");
 
         let cards = sqlx::query_as_with::<_, CardRow, _>(&sql, values.clone())
             .fetch_all(&mut conn)
@@ -206,7 +207,7 @@ impl MtgDataAccessLayer for MtgRepository {
         Ok(QuerySet::new(
             cards,
             QuerySetMeta {
-                page,
+                page: filter.pagination.page(),
                 per_page: 20,
                 total_pages: self.counters.cards.div_ceil(20),
             },
@@ -215,7 +216,6 @@ impl MtgDataAccessLayer for MtgRepository {
 
     async fn find_decks(&self, filter: FindDecksFilter) -> Result<QuerySet<Deck>> {
         let mut conn = self.db.acquire().await?.detach();
-        let page = filter.page.unwrap_or(1);
         let (sql, values) = Query::select()
             .columns([Decks::Id, Decks::Name, Decks::Code, Decks::Release])
             .from(Decks::Table)
@@ -240,7 +240,7 @@ impl MtgDataAccessLayer for MtgRepository {
         Ok(QuerySet::new(
             decks,
             QuerySetMeta {
-                page,
+                page: filter.pagination.page(),
                 per_page: 20,
                 total_pages: self.counters.decks.div_ceil(20),
             },

@@ -53,8 +53,8 @@ export type PaginatedResponseCard = {
     title: string;
     toughness?: string | null;
   }>;
-  page: number;
-  total: number;
+  page: bigint;
+  total: bigint;
   totalPages: number;
 };
 
@@ -65,8 +65,8 @@ export type PaginatedResponseDeck = {
     name: string;
     release: Date;
   }>;
-  page: number;
-  total: number;
+  page: bigint;
+  total: bigint;
   totalPages: number;
 };
 
@@ -94,6 +94,10 @@ export type RetrieveCardsData = {
      * UUIDs for Cards to Skip
      */
     skip?: string | null;
+    /**
+     * Page number (starts from 1)
+     */
+    page?: number | null;
   };
   url: "/api/v0/mtg/cards";
 };
@@ -119,13 +123,13 @@ export type RetrieveCardsResponse =
 
 export type RetrieveDecksData = {
   body?: never;
-  path?: never;
-  query?: {
+  path: {
     /**
      * Page number (starts from 1)
      */
-    page?: number | null;
+    page: number | null;
   };
+  query?: never;
   url: "/api/v0/mtg/decks";
 };
 

@@ -2,8 +2,8 @@ use std::ops::Deref;
 
 #[derive(Debug, Default, Clone)]
 pub struct QuerySetMeta {
-    pub page: u32,
-    pub per_page: u32,
+    pub page: u64,
+    pub per_page: u64,
     pub total_pages: u32,
 }
 
@@ -11,7 +11,7 @@ pub struct QuerySetMeta {
 #[derive(Debug, Default, Clone)]
 pub struct QuerySet<T: Clone> {
     records: Vec<T>,
-    count: u32,
+    count: u64,
     metadata: QuerySetMeta,
 }
 
@@ -42,7 +42,7 @@ impl<T: Clone> QuerySet<T> {
     /// this `QuerySet` instance.
     pub fn new(records: Vec<T>, metadata: QuerySetMeta) -> Self {
         Self {
-            count: records.len() as u32,
+            count: records.len() as u64,
             records,
             metadata,
         }
@@ -57,19 +57,19 @@ impl<T: Clone> QuerySet<T> {
 
     /// Total amount of records in the database matched by the query
     #[inline]
-    pub fn count(&self) -> u32 {
+    pub fn count(&self) -> u64 {
         self.count.to_owned()
     }
 
     /// Current page of the `QuerySet`
     #[inline]
-    pub fn page(&self) -> u32 {
+    pub fn page(&self) -> u64 {
         self.metadata.page
     }
 
     /// Amount of records per page
     #[inline]
-    pub fn per_page(&self) -> u32 {
+    pub fn per_page(&self) -> u64 {
         self.metadata.per_page
     }
 

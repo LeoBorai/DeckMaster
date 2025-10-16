@@ -6,6 +6,7 @@ use bytes::Bytes;
 use futures_util::Stream;
 use uuid::Uuid;
 
+use crate::common::pagination::Pagination;
 use crate::common::query_set::QuerySet;
 use crate::mtg::model::{Card, Deck};
 
@@ -16,13 +17,13 @@ pub struct FindCardsFilter {
     pub unique: Option<bool>,
     pub title: Option<String>,
     pub skip: Option<Uuid>,
-    pub page: Option<u32>,
+    pub pagination: Pagination,
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct FindDecksFilter {
     pub id: Option<Uuid>,
-    pub page: Option<u32>,
+    pub pagination: Pagination,
 }
 
 #[derive(Clone, Debug, Default)]

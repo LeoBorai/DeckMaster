@@ -14,6 +14,8 @@ const paginatedResponseCardSchemaResponseTransformer = (data: any) => {
     item.number = BigInt(item.number.toString());
     return item;
   });
+  data.page = BigInt(data.page.toString());
+  data.total = BigInt(data.total.toString());
   return data;
 };
 
@@ -29,5 +31,7 @@ const paginatedResponseDeckSchemaResponseTransformer = (data: any) => {
     item.release = new Date(item.release);
     return item;
   });
+  data.page = BigInt(data.page.toString());
+  data.total = BigInt(data.total.toString());
   return data;
 };

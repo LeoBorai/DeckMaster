@@ -53,9 +53,9 @@ export const retrieveCards = <ThrowOnError extends boolean = false>(
  * Get all Decks with filtering
  */
 export const retrieveDecks = <ThrowOnError extends boolean = false>(
-  options?: Options<RetrieveDecksData, ThrowOnError>,
+  options: Options<RetrieveDecksData, ThrowOnError>,
 ) => {
-  return (options?.client ?? client).get<
+  return (options.client ?? client).get<
     RetrieveDecksResponses,
     RetrieveDecksErrors,
     ThrowOnError

@@ -26,10 +26,9 @@ use super::Card;
 )]
 pub async fn handler(
     Extension(services): Extension<SharedServices>,
-    Query(pagination): Query<PaginationParams>,
     Query(filter): Query<FindCardsParams>,
 ) -> Result<Json<PaginatedResponse<Card>>, StatusCode> {
-    let page = pagination.page();
+    let pagination = PaginationParams { page: filter.page };
     let cards_qs = services
         .mtg
         .get_cards(FindCardsFilter {
@@ -37,8 +36,8 @@ pub async fn handler(
             id: filter.id,
             title: filter.title,
             unique: filter.unique,
-            page: page.into(),
             skip: filter.skip,
+            pagination: pagination.into(),
         })
         .await
         .map_err(|err| {
@@ -71,4 +70,7 @@ pub struct FindCardsParams {
         example = "2504cb4b-292f-5dd8-8c9e-6e805500454d, ac0dbd6e-4c71-5d7b-a96a-8bd1d7908326"
     )]
     pub(self) skip: Option<Uuid>,
+    /// Page number (starts from 1)
+    #[param(example = 1, minimum = 1)]
+    pub(self) page: Option<u32>,
 }

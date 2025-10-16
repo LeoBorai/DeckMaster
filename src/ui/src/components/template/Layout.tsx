@@ -11,7 +11,7 @@ export function Layout(): JSX.Element {
           <NavLink to="/">Search</NavLink>
         </nav>
       </header>
-      <main>
+      <main className="w-11/12 md:max-w-[1200px] mx-auto">
         <Outlet />
       </main>
     </div>

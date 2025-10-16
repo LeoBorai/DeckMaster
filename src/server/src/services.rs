@@ -2,7 +2,7 @@ use std::{env::var, sync::Arc};
 
 use anyhow::{Context, Result};
 use reqwest::Url;
-use sqlx::SqlitePool;
+use sqlx::{SqlitePool, sqlite::SqliteConnectOptions};
 
 use deckmaster_domain::mtg::service::MtgService;
 
@@ -17,7 +17,10 @@ pub struct Services {
 impl Services {
     pub async fn new() -> Result<Self> {
         let storage_url = var("STORAGE_URL").context("Missing STORAGE_URL")?;
-        let db_pool = SqlitePool::connect("data/mtg.sqlite").await?;
+        let db_conf = SqliteConnectOptions::new()
+            .filename("data/mtg.sqlite")
+            .create_if_missing(true);
+        let db_pool = SqlitePool::connect_with(db_conf).await?;
         let db_pool = Arc::new(db_pool);
         let storage_url = Url::parse(&storage_url)?;
         let mtg_repository = MtgRepository::new(Arc::clone(&db_pool), storage_url).await?;

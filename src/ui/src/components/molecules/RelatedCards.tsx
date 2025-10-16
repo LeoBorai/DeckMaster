@@ -12,22 +12,25 @@ export type Props = {
 
 export function RelatedCards({ card }: Props): JSX.Element {
   const [relatedCards, setRelatedCards] = useState<Card[]>([]);
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     loadRelatedCards(card);
   }, [card]);
 
-  const loadRelatedCards = async (card: Card) => {
+  const loadRelatedCards = async (card: Card, page: number = 1) => {
     const response = await retrieveCards({
       baseUrl: import.meta.env.VITE_DECKMASTER_API_URL,
       query: {
         deck_id: card.deckId,
         skip: card.id,
+        page,
       },
     });
 
-    if (response.data) {
-      setRelatedCards(response.data.data || []);
+    if (response.data && Array.isArray(response.data.data)) {
+      const globalCards = [...relatedCards, ...response.data.data];
+      setRelatedCards(globalCards);
     }
   };
 
@@ -43,6 +46,16 @@ export function RelatedCards({ card }: Props): JSX.Element {
           </div>
         </div>
       )}
+      <button
+        onClick={() => {
+          const nextPage = page + 1;
+
+          loadRelatedCards(card, nextPage);
+          setPage(nextPage);
+        }}
+      >
+        Load More
+      </button>
     </div>
   );
 }

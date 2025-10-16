@@ -86,7 +86,14 @@ export function CardMiniature({ card }: Props): JSX.Element {
               {card.description || "No description available"}
             </p>
           </article>
-          <NavLink to={`/cards/${card.id}`}>Go to details</NavLink>
+          <NavLink
+            to={`/cards/${card.id}`}
+            onClick={() => {
+              setIsFlipped(false);
+            }}
+          >
+            Go to details
+          </NavLink>
           <button type="button" onClick={handleFlip}>
             Flip back
           </button>
