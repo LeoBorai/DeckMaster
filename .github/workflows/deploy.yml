@@ -1,0 +1,73 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      REVISION:
+        description: 'Revision to deploy. This accepts any valid reference to a tag, a GIT SHA published or "latest".'
+        required: true
+        default: 'latest'
+  workflow_call:
+    secrets:
+      FLY_API_TOKEN:
+        required: true
+      FLY_APP_NAME:
+        required: true
+
+env:
+  FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+jobs:
+  deploy:
+    name: Deploy app
+    runs-on: ubuntu-latest
+    concurrency: deploy-group
+    steps:
+      - name: Checkout Source
+        if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.REVISION == 'latest' }}
+        uses: actions/checkout@v4
+
+      - name: Checkout Source Version ${{ github.event.inputs.REVISION }}
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.REVISION != 'latest' }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.REVISION }}
+
+      - name: Git Fetch Unshallow
+        run: git fetch --prune --unshallow
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull Latest Docker Image from GitHub Container Registry
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: docker pull ghcr.io/leoborai/deckmaster:latest
+
+      - name: Pull Docker Image Version "${{ github.event.inputs.REVISION }}" from GitHub Container Registry
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: docker pull ghcr.io/leoborai/deckmaster:${{ github.event.inputs.REVISION }}
+
+      - name: Install yq
+        run: sudo snap install yq
+
+      - name: Generate fly.toml from template
+        run: |
+          FLY_APP_NAME="${{ secrets.FLY_APP_NAME }}" \
+          yq eval '.app = env(FLY_APP_NAME)' ./config/fly.template.toml > fly.toml
+
+      - name: Setup flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@1.5
+
+      - name: Deploy Latest to Fly.io
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        run: |
+          flyctl deploy -i ghcr.io/leoborai/deckmaster:latest
+
+      - name: Deploy "${{ github.event.inputs.REVISION }}" to Fly.io
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          flyctl deploy -i ghcr.io/leoborai/deckmaster:${{ github.event.inputs.REVISION }}
