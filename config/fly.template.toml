@@ -1,0 +1,26 @@
+app = "{{APP_NAME}}"
+
+kill_signal = "SIGTERM"
+kill_timeout = 5
+processes = []
+primary_region = "sjc"
+
+[build]
+image = "ghcr.io/leoborai/deckmaster:latest"
+
+# https://fly.io/docs/reference/configuration/#the-env-variables-section
+[env]
+RUST_LOG = "info"
+RUST_BACKTRACE = "1"
+
+# https://fly.io/docs/reference/configuration/#the-http_service-section
+[http_service]
+internal_port = 7878
+auto_stop_machines = true
+auto_start_machines = true
+min_machines_running = 0
+
+[http_service.concurrency]
+type = "requests"
+soft_limit = 200
+hard_limit = 250

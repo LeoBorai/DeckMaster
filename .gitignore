@@ -8,3 +8,5 @@ docker/tmp
 src/client/src/*.js
 .DS_Store
 .env
+
+fly.toml
