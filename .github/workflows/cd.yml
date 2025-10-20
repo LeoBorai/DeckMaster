@@ -1,0 +1,26 @@
+name: Continuous Delivery
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    name: Release
+    uses: ./.github/workflows/release.yml
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+
+  deploy:
+    name: Deploy
+    needs: release
+    uses: ./.github/workflows/deploy.yml
+    secrets:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
