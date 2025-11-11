@@ -4,6 +4,7 @@ import { retrieveCards } from "../../services/DeckMaster";
 
 import type { ChangeEventHandler, JSX } from "react";
 import type { Card } from "../../services/DeckMaster/types.gen";
+import { MagnifyingGlassIcon } from "@heroicons/react/16/solid";
 
 type Props = {
   onCardSelect(card: Card): void;
@@ -100,15 +101,25 @@ export function CardSearch(props: Props): JSX.Element {
   return (
     <div className="relative w-full max-w-md">
       <div className="relative">
-        <input
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onFocus={handleFocus}
-          onBlur={handleBlur}
-          placeholder="Search for a card..."
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-colors"
-        />
+        <div className="flex flex-1 justify-center px-2 lg:ml-6 lg:justify-end">
+          <div className="grid w-full max-w-lg grid-cols-1 lg:max-w-xs">
+            <input
+              name="search"
+              placeholder="Search"
+              aria-label="Search"
+              className="col-start-1 row-start-1 block w-full rounded-md bg-emerald-700/50 py-1.5 pr-3 pl-10 text-base text-white outline-1 -outline-offset-1 outline-indigo-400/25 placeholder:text-white/50 focus:outline-2 focus:-outline-offset-2 focus:outline-white sm:text-sm/6"
+              value={inputValue}
+              onChange={handleInputChange}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
+            />
+            <MagnifyingGlassIcon
+              aria-hidden="true"
+              className="pointer-events-none col-start-1 row-start-1 ml-3 size-5 self-center text-white/50"
+            />
+          </div>
+        </div>
+
         {isLoading && (
           <div className="absolute right-3 top-2.5">
             <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>

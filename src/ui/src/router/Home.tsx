@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+
 import { CardSearch } from "../components/atoms/CardSearch";
 
-import { useEffect, type JSX } from "react";
+import type { JSX } from "react";
 
 export function Home(): JSX.Element {
   const navigate = useNavigate();
